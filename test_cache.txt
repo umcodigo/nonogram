@@ -1,0 +1,41 @@
+
+
+
+
+SEM CACHE
+---
+362880 permutations
+623530 operations
+
+COM CACHE
+---
+362880 permutations
+68 operations
+56
+
+
+
+
+
+CHECANDO ANTES DE ADD AO return_list
+---
+362880 permutations
+68 operations
+56 saved perms
+---
+1260 permutations
+68 operations
+56 saved perms
+
+
+
+
+create_perms [5, 6, 1, 1]
+840 perms
+create_perms [2, 2, 1, 2, 2]
+3960 perms
+create_perms [1, 4, 1, 1]
+4004 perms
+create_perms [3, 3, 1]
+1092 perms
+create_perms [2, 3, 2, 1, 1, 1]
