@@ -228,5 +228,8 @@ def solve_grid(n, lines, cols, partial_grid=None):
 
         # print_grid(grid)
         # print('----')
+    
+        if count > 10:
+            raise Exception('too many tries')
         
     return grid, count

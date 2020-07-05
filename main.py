@@ -26,6 +26,3 @@ if __name__ == '__main__':
     
     end = datetime.now()
     print(end-start)
-
-
-
