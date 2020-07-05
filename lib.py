@@ -17,7 +17,7 @@ def pprint_grid(grid):
             print(str(num) + ' ', end='')
         print('')
 
-def create_grid(n, chances=1):
+def create_grid(n):
     grid = []
     for i in range(n):
         line = []
@@ -211,8 +211,11 @@ def solve_grid(n, lines, cols, partial_grid=None):
         filter_cols[i] = create_line_filter(perm_cols[i])
 
     count = 0
+    last_grid = None
     while not is_done(grid):
         count += 1
+
+        last_grid = grid.copy()
 
         grid = update_grid(grid, filter_lines)
         grid = update_grid(grid, transpose_grid(filter_cols))
@@ -229,7 +232,7 @@ def solve_grid(n, lines, cols, partial_grid=None):
         # print_grid(grid)
         # print('----')
     
-        if count > 10:
-            raise Exception('too many tries')
+        if grid == last_grid:
+            raise Exception('not convergent')
         
     return grid, count
