@@ -98,13 +98,6 @@ def flatten_perm(perm):
         else:
             flat_perm.append(item)
     return flat_perm
-
-def is_valid_perm(perm):
-    # cant have two lists with 1's side by side
-    for i in range(len(perm) - 1):
-        if 1 in perm[i] and 1 in perm[i+1]:
-            return False
-    return True
     
 def filter_perms(perms, filter_):
     
@@ -118,18 +111,12 @@ def filter_perms(perms, filter_):
 
 def create_line_filter(perms):
 
-    if len(perms) < 1:
-        return None
+    if len(perms) < 1: return None
 
     n = len(perms[0])
     filter_ = n*[None]
     
     for i in range(n):
-        all_equal = True
-        
-        # if all are 1, sum is len(perms)
-        # if all are 0, sum is 0
-        # any other value becomes None
         
         sum_ = 0
         for perm in perms:
@@ -146,11 +133,11 @@ def create_line_filter(perms):
 ## Funcoes para grid
 
 def is_done(grid):
-        for line in grid:
-            for item in line:
-                if item == None:
-                    return False
-        return True
+    for line in grid:
+        for item in line:
+            if item == None:
+                return False
+    return True
 
 def somas(m, soma):
     # ex: a + b + c = 2
@@ -173,26 +160,24 @@ def somas(m, soma):
     return return_somas
 
 def create_perms(n, counts):
-    print('\n\ncreate_perms', counts)
+    # print('\n\ncreate_perms', counts)
     
     blocks = [[0]] * (len(counts) * 2 - 1)
     blocks[0::2] = [[1]*c for c in counts]
-    print('blocks', blocks)
+    # print('blocks', blocks)
+    
+    zeros = n - sum([len(b) for b in blocks])
+    # print('zeros', zeros)
     
     perms = []
-    for soma in somas(len(blocks) + 1, n - sum(counts)):
-        # print('soma', soma)
-        list_ = []
-        for i in range(len(counts)):
-            if soma[i]:
-                list_.append(soma[i]*[0])
-            list_.append(counts[i]*[1])
-        list_.append(soma[-1]*[0])
-
-        if is_valid_perm(list_):
-            perms.append(flatten_perm(list_))
+    for abc_list in somas(len(blocks) + 1, zeros):
+        
+        perm = [None] * (len(blocks) + len(abc_list))
+        perm[0::2] = [abc*[0] for abc in abc_list]
+        perm[1::2] = blocks
+        perms.append(flatten_perm(perm))
     
-    print(len(perms), perms)
+    # print(len(perms), perms)
     return perms
 
 def update_grid(grid, filter_):
@@ -211,45 +196,25 @@ def update_grid(grid, filter_):
     
 def solve_grid(n, lines, cols, partial_grid=None):
     
-    # print('lines', lines)
-    # print('cols', cols)
-
-    # if partial_grid:
-    #     grid = partial_grid
-    # else:
-    #     grid = n*[n*[None]] # grin nxn of None
 
     grid = n*[n*[None]]
 
-    possible_lines = n*[[]]
+    perm_lines = n*[[]]
     filter_lines = n*[[]]
 
-    possible_cols = n*[[]]
+    perm_cols = n*[[]]
     filter_cols = n*[[]]
 
     for i in range(n):
-        possible_lines[i] = create_perms(n, lines[i])
-        filter_lines[i] = create_line_filter(possible_lines[i])
+        perm_lines[i] = create_perms(n, lines[i])
+        filter_lines[i] = create_line_filter(perm_lines[i])
 
-        possible_cols[i] = create_perms(n, cols[i])
-        filter_cols[i] = create_line_filter(possible_cols[i])
-
-    # print('possible_lines')
-    # print_grid(possible_lines)
-
-    # print('possible_cols')
-    # print_grid(possible_cols)
-
-    # print('filter_lines')
-    # print_grid(filter_lines)
-
-    # print('filter_cols')
-    # print_grid(filter_cols)
+        perm_cols[i] = create_perms(n, cols[i])
+        filter_cols[i] = create_line_filter(perm_cols[i])
 
     count = 0
     while not is_done(grid):
         print('----')
-        n = len(grid)
         count += 1
 
         grid = update_grid(grid, filter_lines)
@@ -257,17 +222,16 @@ def solve_grid(n, lines, cols, partial_grid=None):
 
         trasposed_grid = transpose_grid(grid)
         for i in range(n):
-            possible_lines[i] = filter_perms(possible_lines[i], grid[i])
-            filter_lines[i] = create_line_filter(possible_lines[i])
+            perm_lines[i] = filter_perms(perm_lines[i], grid[i])
+            filter_lines[i] = create_line_filter(perm_lines[i])
 
-            possible_cols[i] = filter_perms(possible_cols[i], trasposed_grid[i])
-            filter_cols[i] = create_line_filter(possible_cols[i])            
+            perm_cols[i] = filter_perms(perm_cols[i], trasposed_grid[i])
+            filter_cols[i] = create_line_filter(perm_cols[i])            
 
 
         print_grid(grid)
-        # input()
         
-    print('Tabela convergiu em {} iterações!'.format(count))
+    return grid, count
 
 
 if __name__ == '__main__':
@@ -275,22 +239,22 @@ if __name__ == '__main__':
     start = datetime.now()
     
     # Teste
-    n = 5
+    # n = 5
 
-    grid = []
-    while not valid_grid(grid):
-        grid = create_grid(n)
+    # grid = []
+    # while not valid_grid(grid):
+    #     grid = create_grid(n)
         
-    print_grid(grid)
+    # print_grid(grid)
     
-    lines = get_counts(grid)
-    cols = get_counts(transpose_grid(grid))
+    # lines = get_counts(grid)
+    # cols = get_counts(transpose_grid(grid))
     
     # Real
 
     # 5
-    # lines = [ [1, 1], [4], [1, 1], [2], [1, 1] ]
-    # cols = [ [3], [2, 1], [1], [2, 1], [2] ]
+    # lines = [ [1, 2], [1, 1, 1], [3], [1, 1], [3] ]
+    # cols =[ [2, 1], [1], [3, 1], [1, 1, 1], [3] ]
 
     # 10
     # lines = [ [6], [3, 1], [1, 2], [2, 3], [6], [4], [5], [2, 4], [2, 4, 1], [3, 6] ]
@@ -309,12 +273,15 @@ if __name__ == '__main__':
     # cols = [ [6], [2, 2, 2], [1, 1, 1], [2, 2, 2, 2], [5, 3, 1], [4, 1, 3, 1], [3, 2, 4, 1], [2, 3, 8], [2, 3, 3], [3, 2, 2], [2, 1, 1, 2], [3, 7], [2, 2, 3, 4], [3, 9, 3], [2, 1, 3, 3, 2], [1, 2, 3, 5], [1, 6, 2, 3], [9, 4, 3], [9, 6], [2, 13] ]
 
     # 20
-    # lines = [ [5], [4], [3, 3], [7, 2], [8, 2], [2, 3, 5], [10], [9, 5], [11, 3], [3, 3, 3, 3], [2, 5, 3, 2], [2, 2, 5, 1], [1, 2, 2, 3], [2, 3, 3], [3, 2, 2], [2, 2, 2], [2, 1], [3], [3], [3] ]
-    # cols = [ [1], [3], [2, 3], [3, 5], [3, 3, 3], [1, 3, 2, 6], [1, 2, 2, 8], [2, 3, 2, 5], [2, 8], [3, 6, 1], [4, 5, 3], [7, 5], [5, 3], [2, 4], [3, 5, 2], [3, 6], [3, 3], [4], [5], [2] ]
+    lines = [ [5], [4], [3, 3], [7, 2], [8, 2], [2, 3, 5], [10], [9, 5], [11, 3], [3, 3, 3, 3], [2, 5, 3, 2], [2, 2, 5, 1], [1, 2, 2, 3], [2, 3, 3], [3, 2, 2], [2, 2, 2], [2, 1], [3], [3], [3] ]
+    cols = [ [1], [3], [2, 3], [3, 5], [3, 3, 3], [1, 3, 2, 6], [1, 2, 2, 8], [2, 3, 2, 5], [2, 8], [3, 6, 1], [4, 5, 3], [7, 5], [5, 3], [2, 4], [3, 5, 2], [3, 6], [3, 3], [4], [5], [2] ]
 
     # Solve
-    # n = len(lines)
-    solve_grid(n, lines, cols)
+    n = len(lines)
+    grid, count = solve_grid(n, lines, cols)
+    print_grid(grid)
+    print('Tabela convergiu em {} iterações!'.format(count))
+    
     
     end = datetime.now()
     print(end-start)
